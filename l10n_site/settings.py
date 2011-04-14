@@ -100,4 +100,5 @@ INSTALLED_APPS = (
     'shipping',
     'bugsy',
     'webby',
+    'todo',
 )

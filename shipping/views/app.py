@@ -37,11 +37,63 @@
 """Views centric around AppVersion data.
 """
 
+from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
 
 from shipping.models import *
+from todo.views import snippets
 
+def project_overview(request, appver_code):
+    appver = get_object_or_404(AppVersion, code=appver_code)
+    active_runs = appver.tree.run_set.filter(active__isnull=False)
+    locales_ids = list(active_runs.values_list('locale', flat=True))
+    locales = Locale.objects.filter(id__in=locales_ids)
+    return render_to_response('shipping/project_overview.html',
+                              {'appver': appver,
+                               'locales': locales,})
+
+def project_tasks(request, appver_code):
+    appver = get_object_or_404(AppVersion, code=appver_code)
+    tree = snippets.tree(request, tracker=None, project=appver.todo, 
+                         task_view='shipping.views.task',
+                         tracker_view='shipping.views.tracker')
+    return render_to_response('shipping/project_tasks.html',
+                              {'appver': appver,
+                               'tree': tree,
+                               # these are needed to make the log-in form 
+                               # reload the page
+                               'request': request,
+                               'login_form_needs_reload': True,})
+
+def combined_overview(request):
+    if 'av' not in request.GET and 'locale' not in request.GET:
+        raise Exception("No appversion nor locale passed as query args.")
+    appver = get_object_or_404(AppVersion, code=request.GET['av'])
+    locale = get_object_or_404(Locale, code=request.GET['locale'])
+    tasks_showcase = snippets.showcase(request, appver.todo, locale,
+                                       task_view='shipping.views.task')
+    return render_to_response('shipping/combined_overview.html',
+                              {'appver': appver,
+                               'locale': locale,
+                               'tasks_showcase': tasks_showcase,})
+
+def combined_tasks(request):
+    if 'av' not in request.GET and 'locale' not in request.GET:
+        raise Exception("No appversion nor locale passed as query args.")
+    appver = get_object_or_404(AppVersion, code=request.GET['av'])
+    locale = get_object_or_404(Locale, code=request.GET['locale'])
+    tree = snippets.tree(request, tracker=None, project=appver.todo,
+                         locale=locale,
+                         task_view='shipping.views.task',
+                         tracker_view='shipping.views.tracker')
+    return render_to_response('shipping/combined_tasks.html',
+                              {'appver': appver,
+                               'locale': locale,
+                               'tree': tree,
+                               # these are needed to make the log-in form 
+                               # reload the page
+                               'request': request,
+                               'login_form_needs_reload': True,})
 
 def changes(req, app_code):
     """Show which milestones on the given appversion took changes for which

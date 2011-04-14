@@ -37,13 +37,15 @@
 '''Views for managing sign-offs and shipping metrics.
 '''
 
-from django.shortcuts import render_to_response
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse
 from life.models import Repository, Locale, Push, Changeset, Tree
 from shipping.models import Milestone, Signoff, Snapshot, AppVersion, Action, SignoffForm, ActionForm
 from l10nstats.models import Run, Run_Revisions
+from todo.views import snippets, new as create_new_wizard
+from todo.models import Task, Tracker
 from django import forms
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -93,12 +95,63 @@ def homesnippet(request):
             'appvers': q,
             })
 
+def teamsnippet(request, locale):
+    active_runs = locale.run_set.filter(active__isnull=False)
+    trees_ids = list(active_runs.values_list('tree', flat=True))
+    q = AppVersion.objects.filter(tree__in=trees_ids)
+    q = q.order_by('app__name','-version')
+    # appvers is a list of tuples and not a dict to preserve the ordering of 
+    # the queryset
+    appvers = []
+    for av in q:
+        appvers.append((av, av.todo.task_count(locale)))
 
-def teamsnippet(request, loc):
     return render_to_string('shipping/team-snippet.html', {
-            'locale': loc,
+            'locale': locale,
+            'appvers': appvers,
             })
 
+def task(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+    task_snippet = snippets.task(request, task,
+                         redirect_view='shipping.views.task')
+    return render_to_response('shipping/task.html',
+                              {'task': task,
+                               'task_snippet': task_snippet,
+                               # these are needed to make the log-in form 
+                               # reload the page
+                               'request': request,
+                               'login_form_needs_reload': True,})
+
+def tracker(request, tracker_id):
+    tracker = get_object_or_404(Tracker, pk=tracker_id)
+    tree = snippets.tree(request, tracker=tracker,
+                         task_view='shipping.views.task',
+                         tracker_view='shipping.views.tracker')
+    return render_to_response('shipping/tree.html',
+                              {'tracker': tracker,
+                               'tree': tree,
+                               # these are needed to make the log-in form 
+                               # reload the page
+                               'request': request,
+                               'login_form_needs_reload': True,})
+
+def new_todo(request):
+    def locale_filter(appver):
+        active_runs = appver.tree.run_set.filter(active__isnull=False)
+        locales_ids = list(active_runs.values_list('locale', flat=True))
+        return Locale.objects.filter(id__in=locales_ids)
+    appvers = AppVersion.objects.filter(milestone__status=1)
+    appvers = appvers.select_related('app').order_by('app__name','-version')
+    config = {
+        'projects': appvers,
+        'locale_filter': locale_filter,
+        #'get_template': lambda step: 'todo/new_%d.html' % step,
+        'task_view': 'shipping.views.task',
+        'tracker_view': 'shipping.views.tracker',
+        'thankyou_view': 'todo.views.created',
+    }
+    return create_new_wizard(request, **config)
 
 def pushes(request):
     if request.GET.has_key('locale'):

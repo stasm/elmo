@@ -1,3 +1,5 @@
+{# vim: set ft=htmldjango ts=2 et sts=2 sw=2: #}
+{% extends "shipping/base.html" %}
 <!-- {% comment %}
    - ***** BEGIN LICENSE BLOCK *****
    - Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -35,11 +37,33 @@
    -
    - ***** END LICENSE BLOCK *****
 {% endcomment %} -->
-<h2>Shipping Applications</h2>
-<p>Signoffs and tasks for applications currently being worked on (i.e. with open milestones).</p>
-<ul>
-  {% for av in appvers %}
-    <li><a href="{{ av.get_absolute_url }}">{{ av }}</a></li>
-  {% endfor %}
-</ul>
-<p><a href="{% url shipping.views.index %}">See all applications &rarr;</a></p>
+{% block style_include %}
+<link rel="stylesheet" type="text/css" href="{% url static path='todo/todo.css' %}" />
+
+<style type="text/css">
+    .todo #outofdate {
+        background-image: url({% url static path="todo/warning.png" %});
+    }
+    .todo #uptodate {
+        background-image: url({% url static path="todo/okay.png" %});
+    }
+    .todo #checking div {
+        background: url({% url static path="loadingAnimation.gif" %}) no-repeat 0 13px;
+    }
+</style>
+{% endblock %}
+
+{% block title %}{{task}}{% endblock %}
+
+{% block content %}
+<div class="nav">
+  {% if task.parent %}
+    <a href="{% url shipping.views.tracker task.parent.id %}">&larr; Parent tracker</a>
+  {% endif %}
+  <a href="{% url shipping.views.index %}">&larr; All applications</a> 
+</div>
+
+<h1>{{task}}</h1>
+
+<div class="todo">{{task_snippet.div}}</div>
+{% endblock %}

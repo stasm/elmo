@@ -1,3 +1,5 @@
+{# vim: set ft=htmldjango ts=2 et sts=2 sw=2: #}
+{% extends "shipping/base.html" %}
 <!-- {% comment %}
    - ***** BEGIN LICENSE BLOCK *****
    - Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -35,11 +37,32 @@
    -
    - ***** END LICENSE BLOCK *****
 {% endcomment %} -->
-<h2>Shipping Applications</h2>
-<p>Signoffs and tasks for applications currently being worked on (i.e. with open milestones).</p>
-<ul>
-  {% for av in appvers %}
-    <li><a href="{{ av.get_absolute_url }}">{{ av }}</a></li>
-  {% endfor %}
-</ul>
-<p><a href="{% url shipping.views.index %}">See all applications &rarr;</a></p>
+
+{% block title %}Overview for {{appver}} in {{locale}}{% endblock %}
+
+{% block content %}
+<div class="nav">
+    <span>overview</span> 
+    <a href="{% url shipping.views.app.combined_tasks %}?locale={{locale.code}}&av={{appver.code}}">tasks</a>
+    <a href="{% url shipping.views.pushes %}?locale={{locale.code}}&av={{appver.code}}">pushes</a>
+</div>
+
+<h1>
+    <a href="{{appver.get_absolute_url}}">{{appver}}</a> in 
+    <a href="{% url homepage.views.locale_team locale.code %}">{{locale}}</a>
+</h1>
+
+<h2>Open tasks</h2>
+{% if not tasks_showcase.empty %}
+  <p>Recently active:</p>
+  <div class="todo">{{tasks_showcase.div}}</div>
+{% else %}
+  <p>No open tasks. Yay!</p>
+{% endif %}
+<p><a href="{% url shipping.views.app.combined_tasks %}?locale={{locale.code}}&av={{appver.code}}">See all tasks &rarr;</a></p>
+
+<h2>Sign-offs</h2>
+<p><em>Please note that you need to have a localizer hg account to be able to actually sign off.</em></p>
+{% comment %}TODO Show the signoff status here?{% endcomment %}
+<p>To sign off, <a href="{% url shipping.views.pushes %}?locale={{locale.code}}&av={{appver.code}}">see all pushes &rarr;</a></p>
+{% endblock %}

@@ -1,3 +1,5 @@
+{# vim: set ft=htmldjango ts=2 et sts=2 sw=2: #}
+{% extends "shipping/base.html" %}
 <!-- {% comment %}
    - ***** BEGIN LICENSE BLOCK *****
    - Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -35,11 +37,57 @@
    -
    - ***** END LICENSE BLOCK *****
 {% endcomment %} -->
-<h2>Shipping Applications</h2>
-<p>Signoffs and tasks for applications currently being worked on (i.e. with open milestones).</p>
-<ul>
-  {% for av in appvers %}
-    <li><a href="{{ av.get_absolute_url }}">{{ av }}</a></li>
+
+{% block style %}
+#teams {
+  -moz-column-width: 35ex;
+}
+#teams > li {
+  list-style-type: none;
+  border-top: 1px solid grey;
+  border-bottom: 1px solid grey;
+  margin-bottom: -1px;
+  padding: 5px;
+  margin-right: 5ex;
+}
+{% endblock %}
+{% block javascript %}
+var styleRule = false;
+function searchFor(s) {
+  if (styleRule) {
+   document.styleSheets[0].deleteRule(0);
+   styleRule=false;
+  }
+  if (typeof(s)==='string' && s.length) {
+    var ruletxt = '#teams>li:not([class*=' + s.toLowerCase() + ']){display:none}';
+   try {
+      document.styleSheets[0].insertRule(ruletxt, 0);
+      styleRule=true;
+    } catch (e){
+      "catch";
+    };
+  }
+}
+{% endblock %}
+
+{% block title %}{{appver}}: Overview{% endblock %}
+
+{% block content %}
+<div class="nav">
+    <span>overview</span>
+    <a href="{% url shipping.views.app.project_tasks appver.code %}">tasks</a>
+</div>
+<h1>Application version: {{appver}}</h1>
+<h2>Project Localizations</h2>
+<p><a href="{% url shipping.views.dashboard %}?av={{appver.code}}">See the dashboard &rarr;</a></p>
+<p>Search for name or locale code: <input type="text" onkeyup="searchFor(event.target.value)"></input></p>
+<ul id="teams">
+  {% for loc in locales %}
+    <li class="{{ loc.code|lower }} {{ loc.name|lower|default:"" }}">
+      <a href="{% url shipping.views.app.combined_overview %}?locale={{loc.code}}&av={{appver.code}}">
+        {% if loc.name %}{{loc.name}}{% else %}{{loc.code}}{% endif %}
+      </a>
+    </li>
   {% endfor %}
 </ul>
-<p><a href="{% url shipping.views.index %}">See all applications &rarr;</a></p>
+{% endblock %}

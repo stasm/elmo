@@ -66,4 +66,16 @@ urlpatterns += patterns('shipping.views.milestone',
 
 urlpatterns += patterns('shipping.views.app',
     (r'^\/app/locale-changes/(.*)', 'changes'),
+    (r'^\/app/(?P<appver_code>.+)/tasks$', 'project_tasks'),
+    (r'^\/app/(?P<appver_code>.+)$', 'project_overview'),
+    # similar to pushes, overview takes `av` and `locale` query args
+    (r'^\/overview$', 'combined_overview'),
+    (r'^\/overview/tasks$', 'combined_tasks'),
+)
+
+# todo integration; these views display a single task and a single tracker
+urlpatterns += patterns('shipping.views',
+    (r'^\/task/(?P<task_id>\d+)$', 'task'), 
+    (r'^\/tracker/(?P<tracker_id>\d+)$', 'tracker'), 
+    (r'^\/new-todo$', 'new_todo'), 
 )

@@ -43,6 +43,7 @@ from django.forms import ModelForm, Select
 from django.contrib.auth.models import User
 from l10nstats.models import Run
 from life.models import Tree, Locale, Push
+from todo.models import Project as TodoProject
 
 from datetime import datetime
 
@@ -63,7 +64,7 @@ class AppVersion(models.Model):
     code = models.CharField(max_length = 20, blank = True)
     codename = models.CharField(max_length = 30, blank = True, null = True)
     tree = models.ForeignKey(Tree)
-
+    todo = models.OneToOneField(TodoProject, related_name="shipping")
 
     def save(self):
         if not self.code:
@@ -72,6 +73,10 @@ class AppVersion(models.Model):
 
     def __unicode__(self):
         return '%s %s' % (self.app.name, self.version)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('shipping.views.app.project_overview', [self.code])
 
 class Signoff(models.Model):
     push = models.ForeignKey(Push)

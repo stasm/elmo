@@ -1,3 +1,4 @@
+{# vim: set ft=htmldjango ts=2 et sts=2 sw=2: #}
 <!-- {% comment %}
    - ***** BEGIN LICENSE BLOCK *****
    - Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -35,9 +36,16 @@
    -
    - ***** END LICENSE BLOCK *****
 {% endcomment %} -->
-<h2>Signoffs</h2>
-<div><em>Please note that you need to have a localizer hg account to be able to
-actually sign off.</em></div>
-<div>Dashboard with signoffs for 
-<a href="{% url shipping.views.dashboard %}?locale={{locale.code}}">{{ locale }}</a>.
+<h2>Applications</h2>
+<ul>
+{% for av, tasks in appvers %}
+  <li>
+    <a href="{% url shipping.views.app.combined_overview %}?locale={{locale.code}}&av={{av.code}}">{{av}}</a>
+    {% comment %}TODO show signoff status here (accepted, pending, etc){% endcomment %}
+    {% if tasks.open %}
+      {{tasks.open}} open task{{tasks.open|pluralize}} ({{tasks.completion}}% complete)
+    {% endif %}
+  </li>
+{% endfor %}
+</ul>
 </div>

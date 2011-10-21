@@ -35,12 +35,8 @@
    -
    - ***** END LICENSE BLOCK *****
 {% endcomment %} -->
-<h2>Signoffs</h2>
-<div><em>Please note that you need to have a localizer hg account to be able to
-actually sign off.</em></div>
-<div>Dashboard with signoffs for 
-<a href="{% url shipping.views.dashboard %}?locale={{locale.code}}">{{ locale }}</a>.
-</div>
+<h2>Applications & Signoffs</h2>
+<div><em>See it all <a href="{% url shipping.views.dashboard %}?locale={{locale.code}}">on the dashboard &rarr;</a>.</em></div>
 <table><tbody>
     {% for run in runs %}
     <tr class="{% if run.missing %}missing{% endif %}">

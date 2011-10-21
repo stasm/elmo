@@ -51,7 +51,7 @@ from django.views.decorators import cache
 
 from life.models import Repository, Locale, Push, Changeset, Push_Changesets
 from shipping.models import AppVersion, Signoff, Action
-from shipping.api import signoff_actions
+from shipping.api import signoff_actions, signoff_summary
 from l10nstats.models import Run, Run_Revisions
 
 
@@ -181,31 +181,7 @@ def signoff(request, locale_code, app_code):
     pushes = _RowCollector(pcs, actions4push).pushes
 
     # get current status of signoffs
-    pending = rejected = accepted = None
-    all_actions = sorted(actions, key=lambda _a: -_a.signoff.id)
-    initial_diff = []
-    for action in all_actions:
-        flag = action.flag
-        _so = action.signoff
-        if flag == Action.PENDING: # keep if there's no pending or rejected
-            if pending is None and rejected is None:
-                pending = _so.push
-                if len(initial_diff) < 2:initial_diff.append(_so.id)
-            continue
-        elif flag == Action.ACCEPTED: # store and don't look any further
-            accepted = _so.push
-            if len(initial_diff) < 2:initial_diff.append(_so.id)
-            break
-        elif flag == Action.REJECTED: # keep, if there's no rejected
-            if rejected is None:
-                rejected = _so.push
-                if len(initial_diff) < 2:initial_diff.append(_so.id)
-            continue
-        elif flag == Action.OBSOLETED: # obsoleted, stop looking
-            break
-        else:
-            # flag == Action.CANCELED, ignore, keep looking
-            pass
+    pending, rejected, accepted, initial_diff = signoff_summary(actions)
 
     # get latest runs for our changesets
     csl = list(pcs.values_list('changeset__id', flat=True))

@@ -124,3 +124,32 @@ def accepted_signoffs(**avq):
                signoff_actions(appversions=avq)
                if flag == Action.ACCEPTED]
     return Signoff.objects.filter(action__in=actions)
+
+def signoff_summary(actions):
+    """get current status of signoffs"""
+    pending = rejected = accepted = None
+    all_actions = sorted(actions, key=lambda _a: -_a.signoff.id)
+    initial_diff = []
+    for action in all_actions:
+        flag = action.flag
+        _so = action.signoff
+        if flag == Action.PENDING: # keep if there's no pending or rejected
+            if pending is None and rejected is None:
+                pending = _so.push
+                if len(initial_diff) < 2:initial_diff.append(_so.id)
+            continue
+        elif flag == Action.ACCEPTED: # store and don't look any further
+            accepted = _so.push
+            if len(initial_diff) < 2:initial_diff.append(_so.id)
+            break
+        elif flag == Action.REJECTED: # keep, if there's no rejected
+            if rejected is None:
+                rejected = _so.push
+                if len(initial_diff) < 2:initial_diff.append(_so.id)
+            continue
+        elif flag == Action.OBSOLETED: # obsoleted, stop looking
+            break
+        else:
+            # flag == Action.CANCELED, ignore, keep looking
+            pass
+    return pending, rejected, accepted, initial_diff

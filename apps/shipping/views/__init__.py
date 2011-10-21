@@ -44,7 +44,8 @@ from django.http import (HttpResponseRedirect, HttpResponse, Http404,
                          HttpResponseNotAllowed, HttpResponseForbidden)
 from life.models import Repository, Locale
 from shipping.models import Milestone, Signoff, AppVersion, Action
-from shipping.api import signoff_actions, flag_lists, accepted_signoffs
+from shipping.api import (signoff_actions, flag_lists, accepted_signoffs,
+                          signoff_summary)
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.views.decorators.cache import cache_control
@@ -93,13 +94,23 @@ def homesnippet(request):
 def teamsnippet(request, loc):
     runs = loc.run_set.filter(active__isnull=False).select_related('tree')
     for run in runs:
+        run.done = 100 * run.changed / (run.changed + run.missing)
+        run.missing_ratio = 100 * run.missing / run.total
+        run.unchanged_ratio = 100 * run.unchanged / run.total
         try:
             run.appversion = run.tree.appversion_set.all()[0]
         except IndexError:
             run.appversion = None
-        run.done = 100 * run.changed / (run.changed + run.missing)
-        run.missing_ratio = 100 * run.missing / run.total
-        run.unchanged_ratio = 100 * run.unchanged / run.total
+            continue
+
+        actions = list(a_id for a_id, flag in \
+                       signoff_actions(appversions={'id': run.appversion.id},
+                                       locales={'id': loc.id}))
+        actions = list(Action.objects.filter(id__in=actions)
+                       .select_related('signoff__push'))
+        # get current status of signoffs
+        run.pending, run.rejected, run.accepted, _ = signoff_summary(actions)
+
     return render_to_string('shipping/team-snippet.html',
                             {'locale': loc,
                              'runs': runs,

@@ -37,7 +37,18 @@
 {% endcomment %} -->
 <h2>Applications & Signoffs</h2>
 <div><em>See it all <a href="{% url shipping.views.dashboard %}?locale={{locale.code}}">on the dashboard &rarr;</a>.</em></div>
-<table><tbody>
+<table>
+    <thead><tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>Current accepted signoff</th>
+        <th>Rejected signoff</th>
+        <th>Pending signoff</th>
+        <th>Newer good push (suggested signoff)</th>
+    </th></thead>
+    <tbody>
     {% for run in runs %}
     <tr class="{% if run.missing %}missing{% endif %}">
         <td>
@@ -59,6 +70,10 @@
             </tr></tbody></table>
         </td>
         <td>{% if run.errors %}<span title="{{ run.errors }} errors">[!]</span>{% endif %}</td>
+        <td><a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.accepted.tip.shortrev }}">{{ run.accepted.tip.shortrev }}</a></td>
+        <td><a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.rejected.tip.shortrev }}">{{ run.rejected.tip.shortrev }}</a></td>
+        <td><a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.pending.tip.shortrev }}">{{ run.pending.tip.shortrev }}</a></td>
+        <td></td>
     </tr>
     {% endfor %}
 </tbody></table>

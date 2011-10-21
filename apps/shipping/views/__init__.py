@@ -91,10 +91,19 @@ def homesnippet(request):
 
 
 def teamsnippet(request, loc):
-    return render_to_string('shipping/team-snippet.html', {
-            'locale': loc,
-            })
-
+    runs = loc.run_set.filter(active__isnull=False).select_related('tree')
+    for run in runs:
+        try:
+            run.appversion = run.tree.appversion_set.all()[0]
+        except IndexError:
+            run.appversion = None
+        run.done = 100 * run.changed / (run.changed + run.missing)
+        run.missing_ratio = 100 * run.missing / run.total
+        run.unchanged_ratio = 100 * run.unchanged / run.total
+    return render_to_string('shipping/team-snippet.html',
+                            {'locale': loc,
+                             'runs': runs,
+                            })
 
 def _universal_newlines(content):
     "CompareLocales reads files with universal newlines, fake that"

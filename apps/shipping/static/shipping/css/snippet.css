@@ -44,10 +44,13 @@
   border-bottom: 1px solid #ccc;
 }
 .treesummary.odd {
-  background-color: #eee;
+  background-color: #ffe;
 }
-.treesummary.missing {
+.treesummary.odd.missing {
   background-color: #fcc;
+}
+.treesummary.even.missing {
+  background-color: #ffdede;
 }
 
 .treesummary > td {

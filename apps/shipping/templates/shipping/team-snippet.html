@@ -37,11 +37,11 @@
 {% endcomment %} -->
 <h2>Applications & Signoffs</h2>
 <div><em>See it all <a href="{% url shipping.views.dashboard %}?locale={{locale.code}}">on the dashboard &rarr;</a>.</em></div>
-<table>
+<table class="trees">
     <tbody>
     {% for run in runs %}
-    <tr class="{% if run.missing %}missing{% endif %}">
-        <td>
+    <tr class="treesummary {% if run.missing %}missing{% endif %} {% cycle 'odd' 'even' %}">
+        <td class="treename">
             {% if run.appversion %}
                 {{ run.appversion }}<br>
                 <small>{{ run.tree.code }}</small>
@@ -49,8 +49,8 @@
                 {{ run.tree.code }}
             {% endif %}
         </td>
-        <td>{{ run.total }}<br><small>strings</small></td>
-        <td>
+        <td class="treetotal">{{ run.total }}<br><small>strings</small></td>
+        <td class="treestats">
             {{ run.done }} % done<br>
             <small>{{ run.completion }} % changed</small>
             <table class="stats"><tbody><tr>
@@ -59,7 +59,7 @@
                 <td width="{{ run.unchanged_ratio }}px" class="status unchanged" title="unchanged"/>
             </tr></tbody></table>
         </td>
-        <td>
+        <td class="treeerrors">
             {% if run.errors %}
                 <img title="{{ run.errors }} errors" src="{{ STATIC_URL }}shipping/img/errors.png">
             {% endif %}

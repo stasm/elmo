@@ -66,21 +66,21 @@
         </td>
         <td>
             {% if run.accepted %}
-                <a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.accepted.tip.shortrev }}">
+                <a href="{% url shipping.views.signoff.signoff locale.code run.appversion.code %}#{{ run.accepted.tip.shortrev }}">
                     <img title="Current accepted signoff" src="{{ STATIC_URL }}shipping/img/accepted.png">
                 </a>
             {% endif %}
         </td>
         <td>
             {% if run.rejected %}
-                <a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.rejected.tip.shortrev }}">
+                <a href="{% url shipping.views.signoff.signoff locale.code run.appversion.code %}#{{ run.rejected.tip.shortrev }}">
                     <img title="Rejected signoff" src="{{ STATIC_URL }}shipping/img/rejected.png">
                 </a>
             {% endif %}
         </td>
         <td>
             {% if run.pending %}
-                <a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.pending.tip.shortrev }}">
+                <a href="{% url shipping.views.signoff.signoff locale.code run.appversion.code %}#{{ run.pending.tip.shortrev }}">
                     <img title="Pending signoff" src="{{ STATIC_URL }}shipping/img/pending.png">
                 </a>
             {% endif %}

@@ -53,7 +53,7 @@
         <td class="treestats">
             <small>{{ run.completion }} % changed</small>
             <table class="stats"><tbody><tr>
-                <td width="{{ run.completion }}px" class="status changed" title="changed"/>
+                <td width="{{ run.changed_ratio }}px" class="status changed" title="changed"/>
                 <td width="{{ run.missing_ratio }}px" class="status missing" title="missing"/>
                 <td width="{{ run.unchanged_ratio }}px" class="status unchanged" title="unchanged"/>
             </tr></tbody></table>

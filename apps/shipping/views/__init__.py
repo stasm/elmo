@@ -95,8 +95,17 @@ def teamsnippet(request, loc):
     runs = loc.run_set.filter(active__isnull=False).select_related('tree') \
                        .order_by('tree__code')
     for run in runs:
-        run.missing_ratio = 100 * run.missing / run.total
+        run.changed_ratio = run.completion
         run.unchanged_ratio = 100 * run.unchanged / run.total
+        run.missing_ratio = 100 * run.allmissing / run.total
+        # cheat a bit and make sure that the red stripe on the chart is at 
+        # least 1px wide
+        if run.allmissing and run.missing_ratio == 0:
+            run.missing_ratio = 1
+            for ratio in (run.changed_ratio, run.unchanged_ratio):
+                if ratio:
+                    ratio = ratio - 1
+                    break
         try:
             run.appversion = run.tree.appversion_set.all()[0]
         except IndexError:

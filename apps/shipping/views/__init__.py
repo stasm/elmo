@@ -114,7 +114,7 @@ def teamsnippet(request, loc):
     return render_to_string('shipping/team-snippet.html',
                             {'locale': loc,
                              'runs': runs,
-                            })
+                            }, context_instance=RequestContext(request))
 
 def _universal_newlines(content):
     "CompareLocales reads files with universal newlines, fake that"

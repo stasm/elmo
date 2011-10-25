@@ -38,16 +38,6 @@
 <h2>Applications & Signoffs</h2>
 <div><em>See it all <a href="{% url shipping.views.dashboard %}?locale={{locale.code}}">on the dashboard &rarr;</a>.</em></div>
 <table>
-    <thead><tr>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th>Current accepted signoff</th>
-        <th>Rejected signoff</th>
-        <th>Pending signoff</th>
-        <th>Newer good push (suggested signoff)</th>
-    </th></thead>
     <tbody>
     {% for run in runs %}
     <tr class="{% if run.missing %}missing{% endif %}">
@@ -69,10 +59,32 @@
                 <td width="{{ run.unchanged_ratio }}px" class="status unchanged" title="unchanged"/>
             </tr></tbody></table>
         </td>
-        <td>{% if run.errors %}<span title="{{ run.errors }} errors">[!]</span>{% endif %}</td>
-        <td><a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.accepted.tip.shortrev }}">{{ run.accepted.tip.shortrev }}</a></td>
-        <td><a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.rejected.tip.shortrev }}">{{ run.rejected.tip.shortrev }}</a></td>
-        <td><a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.pending.tip.shortrev }}">{{ run.pending.tip.shortrev }}</a></td>
+        <td>
+            {% if run.errors %}
+                <img title="{{ run.errors }} errors" src="{{ STATIC_URL }}shipping/img/errors.png">
+            {% endif %}
+        </td>
+        <td>
+            {% if run.accepted %}
+                <a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.accepted.tip.shortrev }}">
+                    <img title="Current accepted signoff" src="{{ STATIC_URL }}shipping/img/accepted.png">
+                </a>
+            {% endif %}
+        </td>
+        <td>
+            {% if run.rejected %}
+                <a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.rejected.tip.shortrev }}">
+                    <img title="Rejected signoff" src="{{ STATIC_URL }}shipping/img/rejected.png">
+                </a>
+            {% endif %}
+        </td>
+        <td>
+            {% if run.pending %}
+                <a href="{% url shipping.views.signoff.signoff locale run.appversion.code %}#{{ run.pending.tip.shortrev }}">
+                    <img title="Pending signoff" src="{{ STATIC_URL }}shipping/img/pending.png">
+                </a>
+            {% endif %}
+        </td>
         <td></td>
     </tr>
     {% endfor %}

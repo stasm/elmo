@@ -95,7 +95,6 @@ def teamsnippet(request, loc):
     runs = loc.run_set.filter(active__isnull=False).select_related('tree') \
                        .order_by('tree__code')
     for run in runs:
-        run.done = 100 * run.changed / (run.changed + run.missing)
         run.missing_ratio = 100 * run.missing / run.total
         run.unchanged_ratio = 100 * run.unchanged / run.total
         try:

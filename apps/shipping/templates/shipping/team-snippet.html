@@ -44,10 +44,8 @@
         <td class="treename">
             {% if run.appversion %}
                 <strong>{{ run.appversion }}</strong><br>
-                <small>{{ run.tree.code }}</small>
-            {% else %}
-                <strong>{{ run.tree.code }}</strong>
             {% endif %}
+            <small>{{ run.tree.code }}</small>
         </td>
         <td class="treetotal">{{ run.total }}<br><small>strings</small></td>
         <td class="treestats">

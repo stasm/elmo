@@ -82,4 +82,6 @@ td.treemissing {
 }
 td.treeerrors {
   min-width: 100px;
+  padding-left: 1em;
+  padding-right: 1em;
 }

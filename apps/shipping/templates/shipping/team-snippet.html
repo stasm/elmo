@@ -93,7 +93,13 @@
                 </a>
             {% endif %}
         </td>
-        <td></td>
+        <td>
+            {% if run.suggested_shortrev %}
+                <a href="{% url shipping.views.signoff.signoff locale.code run.appversion.code %}#{{ run.suggested_shortrev }}">
+                    <img title="suggested signoff" src="{{ STATIC_URL }}shipping/img/suggested.png">
+                </a>
+            {% endif %}
+        </td>
     </tr>
     {% endfor %}
 </tbody></table>

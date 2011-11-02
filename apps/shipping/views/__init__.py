@@ -45,7 +45,7 @@ from django.http import (HttpResponseRedirect, HttpResponse, Http404,
 from life.models import Repository, Locale
 from shipping.models import Milestone, Signoff, AppVersion, Action
 from shipping.api import (signoff_actions, flag_lists, accepted_signoffs,
-                          signoff_summary)
+                          signoff_summary, annotated_pushes)
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.views.decorators.cache import cache_control
@@ -112,13 +112,19 @@ def teamsnippet(request, loc):
             run.appversion = None
             continue
 
-        actions = list(a_id for a_id, flag in \
-                       signoff_actions(appversions={'id': run.appversion.id},
-                                       locales={'id': loc.id}))
-        actions = list(Action.objects.filter(id__in=actions)
-                       .select_related('signoff__push'))
+        actions = [action_id for action_id, flag
+                   in signoff_actions(appversions={'id': run.appversion.id},
+                                      locales={'id': loc.id})]
+        actions = Action.objects.filter(id__in=actions) \
+                                .select_related('signoff__push')
         # get current status of signoffs
         run.pending, run.rejected, run.accepted, _ = signoff_summary(actions)
+
+        # get the suggested signoff
+        forest = run.tree.l10n
+        repo = get_object_or_404(Repository, locale=loc, forest=forest)
+        _, _, run.suggested_shortrev = annotated_pushes(repo, run.appversion, 
+                                                        loc, actions)
 
     return render_to_string('shipping/team-snippet.html',
                             {'locale': loc,
